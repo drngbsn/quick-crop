@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Upload, Download, RotateCcw, Sun, Moon, Settings, Crop, FileImage } from 'lucide-react';
+import { Upload, Download, RotateCcw, Sun, Moon, Settings, FileImage } from 'lucide-react';
 import './App.css';
 
 // Simple cropping component - Optimized for compact design
@@ -409,12 +409,8 @@ const QuickCrop = () => {
         <div className="header">
           <div className="header-left">
             <div className="brand-section">
-              <div className="logo">
-                <Crop size={24} />
-              </div>
               <div className="title-section">
                 <h1>QuickCrop</h1>
-                <p className="subtitle">by <span className="brand-name">WestSky Studio</span></p>
               </div>
             </div>
           </div>
