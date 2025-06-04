@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Upload, Download, RotateCcw, Sun, Moon, FileImage, X } from 'lucide-react';
 import JSZip from 'jszip';
 import './App.css';
@@ -23,8 +23,8 @@ function App() {
     preserveOriginalSize: false
   });
 
-  // Aspect ratio configurations
-  const aspectRatios = {
+  // Aspect ratio configurations - moved to useMemo to prevent re-creation on every render
+  const aspectRatios = useMemo(() => ({
     square: { 
       ratio: 1, 
       label: 'Square', 
@@ -43,12 +43,12 @@ function App() {
       description: 'Stories, Mobile content',
       outputSize: '1080 × 1920px'
     },
-  };
+  }), []);
 
-  // Get current aspect ratio
+  // Get current aspect ratio - memoized to prevent unnecessary re-renders
   const getCurrentRatio = useCallback(() => {
-  return aspectRatios[selectedRatio];
-}, [aspectRatios, selectedRatio]);
+    return aspectRatios[selectedRatio];
+  }, [aspectRatios, selectedRatio]);
 
   // Theme toggle
   const toggleTheme = () => {
@@ -265,7 +265,7 @@ function App() {
         };
       });
     });
-  }, [selectedRatio, images.length, getCurrentRatio]); // Added missing dependency
+  }, [selectedRatio, images.length, getCurrentRatio]);
 
   // Canvas creation and download functions
   const createCroppedCanvas = useCallback((image) => {
@@ -314,7 +314,7 @@ function App() {
     );
 
     return canvas;
-  }, [settings.preserveOriginalSize]);
+  }, [settings.preserveOriginalSize, getCurrentRatio]);
 
   const canvasToBlob = useCallback((canvas, format, quality) => {
     return new Promise((resolve) => {
@@ -333,7 +333,7 @@ function App() {
     URL.revokeObjectURL(url);
   }, []);
 
-  // Download all cropped images with proper dependencies
+  // Download all cropped images with proper dependencies - Fixed missing 'getCurrentRatio' dependency
   const downloadAllCroppedImages = useCallback(async () => {
     if (images.length === 0) return;
     
