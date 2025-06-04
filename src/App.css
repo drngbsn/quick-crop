@@ -740,7 +740,7 @@ body {
   margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--space-sm);
   letter-spacing: -0.1px;
 }

@@ -605,8 +605,15 @@ const QuickCrop = () => {
             {/* Footer Info */}
             <div className="footer-info">
               <div className="westsky-branding">
-                <span className="westsky-text">Made by</span>
-                <span className="westsky-name">WestSky Studio</span>
+                <span className="westsky-text">Made for free use by</span>
+                <a 
+                  href="https://westsky.studio/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="westsky-name"
+                >
+                  WestSky Studio
+                </a>
               </div>
               
               <div className="footer-how-to-use">
