@@ -1,8 +1,11 @@
+/* Import modern fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
 /* Design System Variables */
 :root {
-  /* Typography */
-  --font-serif: 'EB Garamond', 'Georgia', 'Times New Roman', serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  /* Typography - Modern bold sans + elegant serif */
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Crimson Text', 'Georgia', 'Times New Roman', serif;
   
   /* Brand Colors */
   --brand-background: #FAF9F6;
@@ -87,13 +90,14 @@
 }
 
 body {
-  font-family: var(--font-sans);
-  line-height: 1.5;
+  font-family: var(--font-body);
+  line-height: 1.6;
   color: var(--text-primary);
   background: var(--bg-secondary);
   transition: all 0.2s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
 }
 
 .light-mode {
@@ -124,7 +128,7 @@ body {
   min-height: calc(100vh - 48px);
 }
 
-/* Header - Consistent spacing and typography */
+/* Header - Bold headings */
 .header {
   display: flex;
   justify-content: space-between;
@@ -164,25 +168,27 @@ body {
 }
 
 .title-section h1 {
-  font-family: var(--font-serif);
-  font-size: 28px;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
 }
 
 .subtitle {
-  font-family: var(--font-sans);
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
   color: var(--text-muted);
   margin: 0;
   font-weight: 400;
+  font-style: italic;
 }
 
 .brand-name {
   color: var(--accent-color);
-  font-weight: 500;
+  font-weight: 600;
+  font-style: normal;
 }
 
 .header-controls {
@@ -252,9 +258,9 @@ body {
 }
 
 .card h3 {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--space-lg);
   letter-spacing: -0.3px;
@@ -288,27 +294,30 @@ body {
 }
 
 .upload-area h3 {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--space-sm);
+  letter-spacing: -0.4px;
 }
 
 .upload-area p {
   color: var(--text-muted);
   margin-bottom: var(--space-lg);
-  font-size: 15px;
+  font-size: 16px;
+  font-family: var(--font-body);
 }
 
 .supported-formats {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   background: var(--bg-primary);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
+  font-family: var(--font-body);
 }
 
 /* Bulk Crop Section */
@@ -327,13 +336,17 @@ body {
 
 .batch-info h3 {
   margin-bottom: var(--space-xs);
-  font-size: 20px;
+  font-size: 22px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.4px;
 }
 
 .batch-info p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
   margin: 0;
+  font-family: var(--font-body);
 }
 
 .crop-windows-container {
@@ -374,12 +387,12 @@ body {
 }
 
 .image-number {
-  font-family: var(--font-sans);
+  font-family: var(--font-heading);
   font-size: 12px;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 /* Remove Button - Consistent with control buttons */
@@ -426,7 +439,8 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 13px;
-  font-family: var(--font-sans);
+  font-family: var(--font-heading);
+  font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
@@ -488,7 +502,7 @@ body {
   pointer-events: none;
   z-index: 2;
   opacity: 0.9;
-  font-family: var(--font-sans);
+  font-family: var(--font-heading);
 }
 
 /* Aspect Ratio Selection - Consistent button system */
@@ -510,7 +524,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   box-shadow: var(--shadow-sm);
 }
 
@@ -542,22 +556,24 @@ body {
 
 .aspect-label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-primary);
   margin-bottom: 2px;
+  font-family: var(--font-heading);
 }
 
 .aspect-description {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 1px;
+  font-family: var(--font-body);
 }
 
 .aspect-output-size {
   font-size: 11px;
   color: var(--accent-color);
-  font-weight: 500;
-  font-family: var(--font-sans);
+  font-weight: 600;
+  font-family: var(--font-heading);
 }
 
 .aspect-button-large.active .aspect-label {
@@ -593,10 +609,10 @@ body {
 }
 
 .form-group label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-family: var(--font-sans);
+  font-family: var(--font-heading);
 }
 
 .form-select,
@@ -607,7 +623,7 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 14px;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
@@ -656,7 +672,7 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* Download Button - Consistent with brand */
+/* Download Button - Bold heading font */
 .download-button {
   display: flex;
   align-items: center;
@@ -669,11 +685,12 @@ body {
   border: none;
   border-radius: var(--radius-lg);
   font-size: 14px;
-  font-weight: 600;
-  font-family: var(--font-sans);
+  font-weight: 700;
+  font-family: var(--font-heading);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-md);
+  letter-spacing: 0.3px;
 }
 
 .download-button:hover:not(:disabled) {
@@ -694,7 +711,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Footer - Consistent with overall design */
+/* Footer - Mixed typography */
 .footer-info {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
@@ -715,17 +732,24 @@ body {
 }
 
 .westsky-text {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
+  font-style: italic;
 }
 
 .westsky-name {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: 16px;
   color: var(--accent-color);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.2px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.westsky-name:hover {
+  color: var(--accent-hover);
 }
 
 .footer-how-to-use {
@@ -733,16 +757,16 @@ body {
 }
 
 .footer-how-to-use h4 {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: var(--space-sm);
-  letter-spacing: -0.1px;
+  letter-spacing: 0.2px;
 }
 
 .footer-how-to-use ul {
@@ -755,14 +779,14 @@ body {
 }
 
 .footer-how-to-use li {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   padding-left: var(--space-lg);
   position: relative;
   text-align: left;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .footer-how-to-use li::before {
@@ -774,13 +798,14 @@ body {
 }
 
 .privacy-note {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.5;
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   padding-top: var(--space-md);
   border-top: 1px solid var(--border-light);
+  font-style: italic;
 }
 
 /* Responsive Design - Optimized for compact frame */
@@ -808,7 +833,7 @@ body {
   }
   
   .title-section h1 {
-    font-size: 24px;
+    font-size: 28px;
   }
   
   .main-content {
@@ -836,7 +861,7 @@ body {
   }
   
   .title-section h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   .upload-area h3 {
