@@ -263,7 +263,7 @@ function App() {
         };
       });
     });
-  }, [selectedRatio, images.length]); // Fixed dependency
+  }, [selectedRatio, images.length, getCurrentRatio]); // Added missing dependency
 
   // Canvas creation and download functions
   const createCroppedCanvas = useCallback((image) => {
