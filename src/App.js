@@ -48,7 +48,7 @@ function App() {
   // Get current aspect ratio
   const getCurrentRatio = useCallback(() => {
   return aspectRatios[selectedRatio];
-}, [selectedRatio]);
+}, [aspectRatios, selectedRatio]);
 
   // Theme toggle
   const toggleTheme = () => {
