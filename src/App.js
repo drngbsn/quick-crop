@@ -19,6 +19,52 @@ const ImageCropper = ({
   const cropFrameWidth = 320;
   const cropFrameHeight = aspectRatio ? cropFrameWidth / aspectRatio : cropFrameWidth;
 
+  const handleImageLoad = useCallback((e) => {
+    const img = e.target;
+    const naturalAspect = img.naturalWidth / img.naturalHeight;
+    const cropAspect = aspectRatio || 1;
+
+    let displayWidth, displayHeight;
+    
+    // Scale image to fill the crop frame
+    if (naturalAspect > cropAspect) {
+      // Image is wider - fit to height
+      displayHeight = cropFrameHeight;
+      displayWidth = displayHeight * naturalAspect;
+    } else {
+      // Image is taller - fit to width  
+      displayWidth = cropFrameWidth;
+      displayHeight = displayWidth / naturalAspect;
+    }
+
+    setImageSize({ width: displayWidth, height: displayHeight });
+    
+    // Center the image initially
+    const centerX = (cropFrameWidth - displayWidth) / 2;
+    const centerY = (cropFrameHeight - displayHeight) / 2;
+    setImagePosition({ x: centerX, y: centerY });
+
+    // Report crop data
+    const newCropData = {
+      x: 0,
+      y: 0,
+      width: cropFrameWidth,
+      height: cropFrameHeight,
+      imageX: centerX,
+      imageY: centerY,
+      imageWidth: displayWidth,
+      imageHeight: displayHeight,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight
+    };
+    
+    if (typeof imageIndex !== 'undefined') {
+      onCropComplete(imageIndex, newCropData);
+    } else {
+      onCropComplete(newCropData);
+    }
+  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete, imageIndex]);
+
   const handleMouseDown = useCallback((e) => {
     if (e.target.classList.contains('crop-image')) {
       setIsDragging(true);
@@ -588,50 +634,4 @@ const QuickCrop = () => {
   );
 };
 
-export default QuickCrop;ImageLoad = useCallback((e) => {
-    const img = e.target;
-    const naturalAspect = img.naturalWidth / img.naturalHeight;
-    const cropAspect = aspectRatio || 1;
-
-    let displayWidth, displayHeight;
-    
-    // Scale image to fill the crop frame
-    if (naturalAspect > cropAspect) {
-      // Image is wider - fit to height
-      displayHeight = cropFrameHeight;
-      displayWidth = displayHeight * naturalAspect;
-    } else {
-      // Image is taller - fit to width  
-      displayWidth = cropFrameWidth;
-      displayHeight = displayWidth / naturalAspect;
-    }
-
-    setImageSize({ width: displayWidth, height: displayHeight });
-    
-    // Center the image initially
-    const centerX = (cropFrameWidth - displayWidth) / 2;
-    const centerY = (cropFrameHeight - displayHeight) / 2;
-    setImagePosition({ x: centerX, y: centerY });
-
-    // Report crop data
-    const newCropData = {
-      x: 0,
-      y: 0,
-      width: cropFrameWidth,
-      height: cropFrameHeight,
-      imageX: centerX,
-      imageY: centerY,
-      imageWidth: displayWidth,
-      imageHeight: displayHeight,
-      naturalWidth: img.naturalWidth,
-      naturalHeight: img.naturalHeight
-    };
-    
-    if (typeof imageIndex !== 'undefined') {
-      onCropComplete(imageIndex, newCropData);
-    } else {
-      onCropComplete(newCropData);
-    }
-  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete, imageIndex]);
-
-  const handle
+export default QuickCrop;
