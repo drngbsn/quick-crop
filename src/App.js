@@ -13,7 +13,6 @@ const ImageCropper = ({
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, startPos: { x: 0, y: 0 } });
-  const containerRef = useRef(null);
   const imageRef = useRef(null);
 
   // Fixed crop frame size
@@ -65,7 +64,7 @@ const ImageCropper = ({
     } else {
       onCropComplete(newCropData);
     }
-  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete]);
+  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete, imageIndex]);
 
   const handleMouseDown = useCallback((e) => {
     if (e.target.classList.contains('crop-image')) {
@@ -187,13 +186,12 @@ const ImageCropper = ({
 
 const QuickCrop = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [images, setImages] = useState([]); // Changed to array for multiple images
-  const [cropDataList, setCropDataList] = useState([]); // Array of crop data for each image
-  const [aspectRatio, setAspectRatio] = useState(1); // Default to 1:1
+  const [images, setImages] = useState([]);
+  const [cropDataList, setCropDataList] = useState([]);
+  const [aspectRatio, setAspectRatio] = useState(1);
   const [exportFormat, setExportFormat] = useState('jpeg');
   const [quality, setQuality] = useState(0.9);
   const [filename, setFilename] = useState('cropped-images');
-  const [removeMetadata, setRemoveMetadata] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -215,13 +213,6 @@ const QuickCrop = () => {
     let processedCount = 0;
 
     validFiles.forEach((file, index) => {
-      // Handle HEIC files (convert to JPEG for web display)
-      if (file.name.toLowerCase().endsWith('.heic')) {
-        // For now, we'll treat HEIC as regular image files
-        // In production, you'd want a HEIC to JPEG converter library
-        console.warn('HEIC files need conversion - treating as regular image for now');
-      }
-
       const reader = new FileReader();
       reader.onload = (e) => {
         newImages[index] = {
@@ -277,61 +268,6 @@ const QuickCrop = () => {
     setImages(prevImages => prevImages.filter((_, index) => index !== indexToRemove));
     setCropDataList(prevList => prevList.filter((_, index) => index !== indexToRemove));
   };
-
-  // BULK DOWNLOAD FUNCTION - Processes all images and creates ZIP
-  const downloadCroppedImages = useCallback(async () => {
-    if (images.length === 0 || cropDataList.some(data => !data)) return;
-
-    setIsProcessing(true);
-
-    try {
-      // If single image, download directly
-      if (images.length === 1) {
-        await downloadSingleImage(images[0], cropDataList[0]);
-        setIsProcessing(false);
-        return;
-      }
-
-      // For multiple images, try to create ZIP
-      try {
-        // Dynamically import JSZip (you'll need to install it: npm install jszip)
-        const JSZip = (await import('jszip')).default;
-        const zip = new JSZip();
-
-        for (let i = 0; i < images.length; i++) {
-          const canvas = await createCroppedCanvas(images[i], cropDataList[i]);
-          const blob = await canvasToBlob(canvas);
-          const fileExtension = exportFormat;
-          // New naming: user-input + sequential number
-          const fileName = `${filename}-${i + 1}.${fileExtension}`;
-          zip.file(fileName, blob);
-        }
-
-        // Generate and download ZIP with generic name
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.download = `quickcrop-batch.zip`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-      } catch (zipError) {
-        // Fallback: download images individually if JSZip is not available
-        console.warn('JSZip not available, downloading individually:', zipError);
-        for (let i = 0; i < images.length; i++) {
-          // Use sequential naming for individual downloads too
-          const sequentialName = `${filename}-${i + 1}`;
-          await downloadSingleImageWithName(images[i], cropDataList[i], sequentialName);
-          // Add small delay between downloads
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      }
-    } catch (error) {
-      console.error('Error processing images:', error);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [images, cropDataList, aspectRatio, exportFormat, quality, filename]);
 
   // Helper function to create cropped canvas
   const createCroppedCanvas = useCallback((imageData, cropData) => {
@@ -416,6 +352,55 @@ const QuickCrop = () => {
     link.click();
     URL.revokeObjectURL(url);
   }, [createCroppedCanvas, canvasToBlob, exportFormat]);
+
+  // BULK DOWNLOAD FUNCTION
+  const downloadCroppedImages = useCallback(async () => {
+    if (images.length === 0 || cropDataList.some(data => !data)) return;
+
+    setIsProcessing(true);
+
+    try {
+      // If single image, download directly
+      if (images.length === 1) {
+        await downloadSingleImage(images[0], cropDataList[0]);
+        setIsProcessing(false);
+        return;
+      }
+
+      // For multiple images, try to create ZIP
+      try {
+        const JSZip = (await import('jszip')).default;
+        const zip = new JSZip();
+
+        for (let i = 0; i < images.length; i++) {
+          const canvas = await createCroppedCanvas(images[i], cropDataList[i]);
+          const blob = await canvasToBlob(canvas);
+          const fileName = `${filename}-${i + 1}.${exportFormat}`;
+          zip.file(fileName, blob);
+        }
+
+        // Generate and download ZIP
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.download = `quickcrop-batch.zip`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+      } catch (zipError) {
+        // Fallback: download images individually
+        for (let i = 0; i < images.length; i++) {
+          const sequentialName = `${filename}-${i + 1}`;
+          await downloadSingleImageWithName(images[i], cropDataList[i], sequentialName);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    } catch (error) {
+      console.error('Error processing images:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [images, cropDataList, exportFormat, filename, createCroppedCanvas, canvasToBlob, downloadSingleImage, downloadSingleImageWithName]);
 
   const aspectRatios = [
     { 
@@ -512,7 +497,7 @@ const QuickCrop = () => {
                   <div className="crop-windows-container">
                     {images.map((imageData, index) => (
                       <div key={imageData.id} className="image-crop-card">
-                        {/* Card Header with improved X button */}
+                        {/* Card Header */}
                         <div className="image-crop-header">
                           <div className="image-info">
                             <span className="image-number">Image {index + 1} of {images.length}</span>
@@ -626,19 +611,6 @@ const QuickCrop = () => {
                       placeholder="image-cropped"
                     />
                   </div>
-
-                  <div className="form-group checkbox-group">
-                    <input
-                      type="checkbox"
-                      id="removeMetadata"
-                      checked={removeMetadata}
-                      onChange={(e) => setRemoveMetadata(e.target.checked)}
-                      className="form-checkbox"
-                    />
-                    <label htmlFor="removeMetadata">
-                      Remove metadata (EXIF data)
-                    </label>
-                  </div>
                 </div>
               </div>
             )}
@@ -654,7 +626,7 @@ const QuickCrop = () => {
                 images.length > 1 ? `Download ${images.length} Images` : 'Download Cropped Image'}
             </button>
 
-            {/* Combined Footer Info & How to Use */}
+            {/* Footer Info */}
             <div className="footer-info">
               <div className="westsky-branding">
                 <span className="westsky-text">Made by</span>
