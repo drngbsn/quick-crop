@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Upload, Download, RotateCcw, Sun, Moon, Settings, Crop, FileImage } from 'lucide-react';
 import './App.css';
 
-// Simple cropping component - Updated for bulk support
+// Simple cropping component - Optimized for compact design
 const ImageCropper = ({ 
   src, 
   aspectRatio,
@@ -15,56 +15,9 @@ const ImageCropper = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, startPos: { x: 0, y: 0 } });
   const imageRef = useRef(null);
 
-  // Fixed crop frame size
-  const cropFrameWidth = 400;
+  // Optimized crop frame size for compact design
+  const cropFrameWidth = 320;
   const cropFrameHeight = aspectRatio ? cropFrameWidth / aspectRatio : cropFrameWidth;
-
-  const handleImageLoad = useCallback((e) => {
-    const img = e.target;
-    const naturalAspect = img.naturalWidth / img.naturalHeight;
-    const cropAspect = aspectRatio || 1;
-
-    let displayWidth, displayHeight;
-    
-    // Scale image to fill the crop frame
-    if (naturalAspect > cropAspect) {
-      // Image is wider - fit to height
-      displayHeight = cropFrameHeight;
-      displayWidth = displayHeight * naturalAspect;
-    } else {
-      // Image is taller - fit to width  
-      displayWidth = cropFrameWidth;
-      displayHeight = displayWidth / naturalAspect;
-    }
-
-    setImageSize({ width: displayWidth, height: displayHeight });
-    
-    // Center the image initially
-    const centerX = (cropFrameWidth - displayWidth) / 2;
-    const centerY = (cropFrameHeight - displayHeight) / 2;
-    setImagePosition({ x: centerX, y: centerY });
-
-    // Report crop data (always the full crop frame)
-    const newCropData = {
-      x: 0,
-      y: 0,
-      width: cropFrameWidth,
-      height: cropFrameHeight,
-      imageX: centerX,
-      imageY: centerY,
-      imageWidth: displayWidth,
-      imageHeight: displayHeight,
-      naturalWidth: img.naturalWidth,
-      naturalHeight: img.naturalHeight
-    };
-    
-    // Call onCropComplete with imageIndex if provided (bulk mode)
-    if (typeof imageIndex !== 'undefined') {
-      onCropComplete(imageIndex, newCropData);
-    } else {
-      onCropComplete(newCropData);
-    }
-  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete, imageIndex]);
 
   const handleMouseDown = useCallback((e) => {
     if (e.target.classList.contains('crop-image')) {
@@ -84,7 +37,6 @@ const ImageCropper = ({
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
 
-    // Calculate new position with constraints
     const newX = dragStart.startPos.x + deltaX;
     const newY = dragStart.startPos.y + deltaY;
 
@@ -97,15 +49,12 @@ const ImageCropper = ({
     const constrainedX = Math.max(minX, Math.min(maxX, newX));
     const constrainedY = Math.max(minY, Math.min(maxY, newY));
 
-    // Update position immediately for smooth dragging
     setImagePosition({ x: constrainedX, y: constrainedY });
-
   }, [isDragging, dragStart, imageSize, cropFrameWidth, cropFrameHeight]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     
-    // Only update crop data when dragging stops for better performance
     if (imageRef.current) {
       const newCropData = {
         x: 0,
@@ -120,7 +69,6 @@ const ImageCropper = ({
         naturalHeight: imageRef.current.naturalHeight
       };
       
-      // Call onCropComplete with imageIndex if provided (bulk mode)
       if (typeof imageIndex !== 'undefined') {
         onCropComplete(imageIndex, newCropData);
       } else {
@@ -140,7 +88,6 @@ const ImageCropper = ({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  // Reset position when aspect ratio changes
   React.useEffect(() => {
     if (imageRef.current && imageSize.width > 0) {
       handleImageLoad({ target: imageRef.current });
@@ -172,12 +119,10 @@ const ImageCropper = ({
           draggable={false}
         />
         
-        {/* Crop frame border */}
         <div className="crop-frame-border" />
         
-        {/* Instruction overlay */}
         <div className="crop-instruction">
-          Drag image to reposition
+          Drag to reposition
         </div>
       </div>
     </div>
@@ -202,13 +147,12 @@ const QuickCrop = () => {
   }, [darkMode]);
 
   const handleFileUpload = useCallback((files) => {
-    const validFiles = Array.from(files).slice(0, 10).filter(file => 
+    const validFiles = Array.from(files).slice(0, 8).filter(file => 
       file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.heic')
     );
     
     if (validFiles.length === 0) return;
 
-    // Process each file
     const newImages = [];
     let processedCount = 0;
 
@@ -227,7 +171,6 @@ const QuickCrop = () => {
           setImages(newImages);
           setCropDataList(new Array(newImages.length).fill(null));
           
-          // Set filename based on number of images
           if (newImages.length === 1) {
             setFilename(`${newImages[0].name}-cropped`);
           } else {
@@ -269,7 +212,6 @@ const QuickCrop = () => {
     setCropDataList(prevList => prevList.filter((_, index) => index !== indexToRemove));
   };
 
-  // Helper function to create cropped canvas
   const createCroppedCanvas = useCallback((imageData, cropData) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -277,7 +219,6 @@ const QuickCrop = () => {
       const img = new Image();
       
       img.onload = () => {
-        // Define high-quality output sizes
         let outputWidth, outputHeight;
         
         if (aspectRatio === 1) {
@@ -318,7 +259,6 @@ const QuickCrop = () => {
     });
   }, [aspectRatio]);
 
-  // Helper function to convert canvas to blob
   const canvasToBlob = useCallback((canvas) => {
     return new Promise((resolve) => {
       const mimeType = `image/${exportFormat}`;
@@ -327,7 +267,6 @@ const QuickCrop = () => {
     });
   }, [exportFormat, quality]);
 
-  // Helper function for single image download
   const downloadSingleImage = useCallback(async (imageData, cropData) => {
     const canvas = await createCroppedCanvas(imageData, cropData);
     const blob = await canvasToBlob(canvas);
@@ -340,7 +279,6 @@ const QuickCrop = () => {
     URL.revokeObjectURL(url);
   }, [createCroppedCanvas, canvasToBlob, exportFormat]);
 
-  // Helper function for single image download with custom name
   const downloadSingleImageWithName = useCallback(async (imageData, cropData, customName) => {
     const canvas = await createCroppedCanvas(imageData, cropData);
     const blob = await canvasToBlob(canvas);
@@ -353,21 +291,18 @@ const QuickCrop = () => {
     URL.revokeObjectURL(url);
   }, [createCroppedCanvas, canvasToBlob, exportFormat]);
 
-  // BULK DOWNLOAD FUNCTION
   const downloadCroppedImages = useCallback(async () => {
     if (images.length === 0 || cropDataList.some(data => !data)) return;
 
     setIsProcessing(true);
 
     try {
-      // If single image, download directly
       if (images.length === 1) {
         await downloadSingleImage(images[0], cropDataList[0]);
         setIsProcessing(false);
         return;
       }
 
-      // For multiple images, try to create ZIP
       try {
         const JSZip = (await import('jszip')).default;
         const zip = new JSZip();
@@ -379,7 +314,6 @@ const QuickCrop = () => {
           zip.file(fileName, blob);
         }
 
-        // Generate and download ZIP
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(zipBlob);
         const link = document.createElement('a');
@@ -388,7 +322,6 @@ const QuickCrop = () => {
         link.click();
         URL.revokeObjectURL(url);
       } catch (zipError) {
-        // Fallback: download images individually
         for (let i = 0; i < images.length; i++) {
           const sequentialName = `${filename}-${i + 1}`;
           await downloadSingleImageWithName(images[i], cropDataList[i], sequentialName);
@@ -431,7 +364,7 @@ const QuickCrop = () => {
           <div className="header-left">
             <div className="brand-section">
               <div className="logo">
-                <Crop size={28} />
+                <Crop size={24} />
               </div>
               <div className="title-section">
                 <h1>QuickCrop</h1>
@@ -445,14 +378,14 @@ const QuickCrop = () => {
               className={`control-button ${showSettings ? 'active' : ''}`}
               title="Export Settings"
             >
-              <Settings size={18} />
+              <Settings size={16} />
             </button>
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="control-button"
               title="Toggle Theme"
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </div>
         </div>
@@ -469,12 +402,12 @@ const QuickCrop = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="upload-icon">
-                    <Upload size={48} />
+                    <Upload size={40} />
                   </div>
                   <h3>Drop your images here</h3>
                   <p>or click to browse files</p>
                   <div className="supported-formats">
-                    Supports JPG, PNG, WebP, HEIC & GIF • Up to 10 images
+                    Supports JPG, PNG, WebP, HEIC • Up to 8 images
                   </div>
                 </div>
               ) : (
@@ -488,16 +421,14 @@ const QuickCrop = () => {
                       onClick={resetImages}
                       className="reset-button"
                     >
-                      <RotateCcw size={16} />
+                      <RotateCcw size={14} />
                       Start Over
                     </button>
                   </div>
                   
-                  {/* Individual Crop Windows */}
                   <div className="crop-windows-container">
                     {images.map((imageData, index) => (
                       <div key={imageData.id} className="image-crop-card">
-                        {/* Card Header */}
                         <div className="image-crop-header">
                           <div className="image-info">
                             <span className="image-number">Image {index + 1} of {images.length}</span>
@@ -507,13 +438,12 @@ const QuickCrop = () => {
                             className="remove-image-btn"
                             title="Remove this image"
                           >
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                               <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                             </svg>
                           </button>
                         </div>
                         
-                        {/* Crop Area */}
                         <div className="image-crop-area">
                           <ImageCropper
                             src={imageData.src}
@@ -554,8 +484,8 @@ const QuickCrop = () => {
                     <div className="aspect-preview" style={{
                       aspectRatio: ratio.value,
                       backgroundColor: 'var(--accent-color)',
-                      borderRadius: '3px',
-                      width: ratio.value >= 1 ? '32px' : '18px'
+                      borderRadius: '4px',
+                      width: ratio.value >= 1 ? '28px' : '16px'
                     }} />
                     <div className="aspect-info">
                       <div className="aspect-label">{ratio.label}</div>
@@ -621,7 +551,7 @@ const QuickCrop = () => {
               disabled={images.length === 0 || cropDataList.some(data => !data) || isProcessing}
               className="download-button"
             >
-              <Download size={16} />
+              <Download size={14} />
               {isProcessing ? 'Processing...' : 
                 images.length > 1 ? `Download ${images.length} Images` : 'Download Cropped Image'}
             </button>
@@ -635,7 +565,7 @@ const QuickCrop = () => {
               
               <div className="footer-how-to-use">
                 <h4>
-                  <FileImage size={14} />
+                  <FileImage size={12} />
                   How to use:
                 </h4>
                 <ul>
@@ -658,4 +588,50 @@ const QuickCrop = () => {
   );
 };
 
-export default QuickCrop;
+export default QuickCrop;ImageLoad = useCallback((e) => {
+    const img = e.target;
+    const naturalAspect = img.naturalWidth / img.naturalHeight;
+    const cropAspect = aspectRatio || 1;
+
+    let displayWidth, displayHeight;
+    
+    // Scale image to fill the crop frame
+    if (naturalAspect > cropAspect) {
+      // Image is wider - fit to height
+      displayHeight = cropFrameHeight;
+      displayWidth = displayHeight * naturalAspect;
+    } else {
+      // Image is taller - fit to width  
+      displayWidth = cropFrameWidth;
+      displayHeight = displayWidth / naturalAspect;
+    }
+
+    setImageSize({ width: displayWidth, height: displayHeight });
+    
+    // Center the image initially
+    const centerX = (cropFrameWidth - displayWidth) / 2;
+    const centerY = (cropFrameHeight - displayHeight) / 2;
+    setImagePosition({ x: centerX, y: centerY });
+
+    // Report crop data
+    const newCropData = {
+      x: 0,
+      y: 0,
+      width: cropFrameWidth,
+      height: cropFrameHeight,
+      imageX: centerX,
+      imageY: centerY,
+      imageWidth: displayWidth,
+      imageHeight: displayHeight,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight
+    };
+    
+    if (typeof imageIndex !== 'undefined') {
+      onCropComplete(imageIndex, newCropData);
+    } else {
+      onCropComplete(newCropData);
+    }
+  }, [aspectRatio, cropFrameWidth, cropFrameHeight, onCropComplete, imageIndex]);
+
+  const handle
